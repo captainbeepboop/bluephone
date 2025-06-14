@@ -1,0 +1,6 @@
+{
+    "sketch": "bluephone_midi_3.0\\bluephone_midi_3.0.ino",
+    "port": "COM17",
+    "configuration": "cpu=atmega328",
+    "board": "arduino:avr:nano"
+}
