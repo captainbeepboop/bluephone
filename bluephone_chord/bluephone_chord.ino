@@ -55,16 +55,22 @@ void HandleNoteOn(byte channel, byte note, byte velocity) {
   {
     
     case 1:
+        //aOsc2.setFreq(mtof(float((note+16 > 69 ? note+4 : note+16))));
+        //Osc3.setFreq(mtof(float((note+19 > 69 ? note+7 : note+19))));
         aOsc2.setFreq(mtof(float(note+16)));
         aOsc3.setFreq(mtof(float(note+19)));
     break;
 
     case 2:
+    //aOsc2.setFreq(mtof(float((note+15 > 69 ? note+3 : note+15))));
+    //aOsc3.setFreq(mtof(float((note+19 > 69 ? note+7 : note+19))));
         aOsc2.setFreq(mtof(float(note+15)));
         aOsc3.setFreq(mtof(float(note+19)));
     break;
 
     case 3:
+    //aOsc2.setFreq(mtof(float((note+15 > 69 ? note+3 : note+15))));
+    //aOsc3.setFreq(mtof(float((note+18 > 69 ? note+6 : note+18))));
         aOsc2.setFreq(mtof(float(note+15)));
         aOsc3.setFreq(mtof(float(note+18)));
     break;
@@ -94,7 +100,8 @@ void setup() {
 
   MIDI.setHandleNoteOn(HandleNoteOn);  // Put only the name of the function
   MIDI.setHandleNoteOff(HandleNoteOff);  // Put only the name of the function
-  MIDI.begin(2);
+  //MIDI.begin(2);
+  Serial.begin(9600);
 
   Noise.setFreq(100);
   aOsc.setFreq(mtof(float(50)));
@@ -121,6 +128,7 @@ void setup() {
 void updateControl(){
 
   lfo_frequency = map(analogRead(lfoPot), 0, 1023, 10, 1500);
+  Serial.println(attack);
   aSin.setFreq(lfo_frequency);
   lfo = (int) (aSin.next());
   lfo_print = map(lfo, -116, 115, 0, 255);

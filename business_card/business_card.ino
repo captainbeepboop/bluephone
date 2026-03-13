@@ -15,7 +15,7 @@
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
-#define board 3 //1 = BASS, 2 = CHORDS, 3 = LEAD
+#define board 2 //1 = BASS, 2 = CHORDS, 3 = LEAD
 const byte midi_channels[3] = {4, 2, 3};
 
 //SET UP OSCILLATORS
@@ -395,7 +395,7 @@ void note_on(byte midi_channel, byte midi_note, byte velocity)
 
             case 3:
                 aOsc3.setFreq(mtof(float(note+15)));
-                aOsc4.setFreq(mtof(float(note+18)));
+                aOsc4.setFreq(mtof(float(note+)));
             break;
 
             case 4: 

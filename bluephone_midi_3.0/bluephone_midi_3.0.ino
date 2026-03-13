@@ -26,13 +26,14 @@ const uint8_t colPins[3] = {3, 4, 5};
 uint8_t mode = 2;
 uint8_t phone_number_index = 0;
 uint8_t phone_number[] = {0,0,0,0,0,0,0,0};
-bool mutes[] = {1,0,0,0,0,0}; //drums, chord, lead, bass, sample, clock
+bool mutes[] = {1,0,0,0,0,1}; //drums, chord, lead, bass, sample, clock
 
 //beat stuff
 uint8_t bpm = 120;
 unsigned long bpm_delay_micros = 5000000/bpm;
 unsigned long last_beat_micros = 0;
 uint8_t beat_count = 0;
+bool tap_tempo = 0;
 
 //sequence stuff
 uint8_t sequence_number = 0;
@@ -78,8 +79,8 @@ bool drum_preset_select = 0;
 uint8_t beep_test_count[2] = {0,0};
 bool beep_test_on = 0;
 #define beep_test_number_of_levels 8
-const uint8_t beep_test_laps_per_level[] = {1, 4, 4, 4, 4, 4, 4, 4, 4};
-const uint8_t beep_test_bpm_per_level[] = {25, 80, 100, 120, 140, 160, 180, 200, 220};
+const uint8_t beep_test_laps_per_level[] = {1, 7, 7, 5, 6, 2, 4, 4, 4};
+const uint8_t beep_test_bpm_per_level[] = {100, 100, 120, 140, 160, 180, 200, 220, 240};
 
 unsigned long delayed_sample_times[] = {0,0,0};
 uint8_t delayed_sample_numbers[] = {0,0,0};
@@ -205,6 +206,7 @@ void beat()
 void reset()
 {
     //digitalWrite(solenoid_1, HIGH);
+    stop_note(last_bass, bass_channel);
     mode = 4;
     MIDI.sendNoteOn(0,3,3);  
     sequence_play = 0;
@@ -284,10 +286,7 @@ void button_update(uint8_t button, bool state)
         switch(mode)
         {
             case 1:
-                if(state == 1)
-                {
-                    drum_button_update(button, state);
-                }
+                drum_button_update(button, state); 
             break;
             case 2:
                 chord_button_update(button, state);
@@ -454,32 +453,42 @@ void follow_on_button_update(uint8_t button)
 
 void drum_button_update(uint8_t button, bool state)
 {
-    switch (button)
+    if (state == 1)
     {
-        case 7:
-            play_sample(sample_number);
-        break;
-        case 8:
-            drumbeat_number++;
-            if (drumbeat_number == number_of_drums)
-            {
-                drumbeat_number == 0;
-            }
-            load_drum_sequence(drumbeat_number);
-        break;
-        case 9:
-            bpm++;
-            bpm_delay_micros = 5000000/bpm;
-        break;
-        case 10:
-            stop_sample();
-        break;
-        case 11:
-            mutes[5] = !mutes[5];
-        case 12:
-            bpm--;
-            bpm_delay_micros = 5000000/bpm;
-        break;
+        switch (button)
+        {
+            case 7:
+                play_sample(sample_number);
+            break;
+            case 8:
+                drumbeat_number++;
+                if (drumbeat_number == number_of_drums)
+                {
+                    drumbeat_number == 0;
+                }
+                load_drum_sequence(drumbeat_number);
+            break;
+            case 9:
+                bpm++;
+                bpm_delay_micros = 5000000/bpm;
+            break;
+            case 10:
+                stop_sample();
+            break;
+            case 11:
+                mutes[5] = !mutes[5];
+            case 12:
+                bpm--;
+                bpm_delay_micros = 5000000/bpm;
+            break;
+        }
+    }
+    else
+    {
+      if (button < 4)
+      {
+        mutes[0] = 0;
+      }
     }
 }
 
@@ -499,9 +508,9 @@ void chord_button_update(uint8_t button, bool state)
             {
                 stop_note(last_bass, bass_channel);
                 bass_mode++;
-                if (bass_mode > 2)
+                if (bass_mode > 3)
                 {
-                    bass_mode = 0;
+                    bass_mode = 1;
                 }
             }
         break;
@@ -1047,10 +1056,23 @@ void generate_bass()
         break;
         
         case 3:
+
             if (beat_count % drum_timing == 0)
             {
-                play_note(last_chord[0], bass_channel);
+                if (beat_count/drum_timing % 8 == 0)
+                {
+                    play_note(last_chord[0], bass_channel);
+                }
+                if (beat_count/drum_timing % 8 == 6)
+                {
+                    play_note(last_chord[0], bass_channel);
+                }
+                if (beat_count/drum_timing % 2 == 7 || beat_count/drum_timing % 2 == 2)
+                {
+                    stop_note(last_chord[0], bass_channel);
+                }
             }
+
         break;
 
         case 4:
